@@ -111,7 +111,7 @@ class NMF {
 
 double NMF::MAXVAL = 1e+100;
 double NMF::MINVAL = -1e+100;
-NMF::Ftype px;
+NMF::Ftype NMF::px;
 
 
 int main(int argc, char ** argv)
