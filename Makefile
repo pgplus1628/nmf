@@ -3,6 +3,8 @@ CXXFLAGS?=-O3 -g -std=c++11
 INCLUDES?=-I.
 LDFLAGS?= -lglog -lgflags
 
+all : nmf nmf2
+
 nmf : nmf.o
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS)
 

@@ -143,7 +143,7 @@ class NMF {
       }
       pred = std::min(pred, MAXVAL);
       pred = std::max(pred, MINVAL);
-      float err = e.obs - pred;
+      double err = e.obs - pred;
       rmse += err * err;
     }
 

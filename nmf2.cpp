@@ -18,6 +18,7 @@ DEFINE_int32(strip_width, 1024, "strip_width");
 double NMF::MAXVAL = 1e+100;
 double NMF::MINVAL = -1e+100;
 NMF::Ftype NMF::px;
+NMF::Ftype NMF::px2;
 
 
 int main(int argc, char ** argv)
@@ -69,8 +70,8 @@ int main(int argc, char ** argv)
        NMF::acc_delta2);
     // 3. apply update
 
-    binary_app<NMF::Ftype, NMF::Ftype, NMF::Ftype>(*f_user, *r_user, NMF::px, NMF::apply_delta);
-    binary_app<NMF::Ftype, NMF::Ftype, NMF::Ftype>(*f_item, *r_item, NMF::px2, NMF::apply_delta);
+    binary_app<NMF::Ftype, NMF::Ftype, NMF::Ftype>(*f_user, *r_user, NMF::px, NMF::apply_delta2);
+    binary_app<NMF::Ftype, NMF::Ftype, NMF::Ftype>(*f_item, *r_item, NMF::px2, NMF::apply_delta2);
 
     /* accumulate rmse */
     double rmse = 0.0;
