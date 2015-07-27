@@ -107,6 +107,20 @@ class NMF {
       }
     }
 
+
+    static void acc_error(Ftype &f_user, Ftype &f_item, Etype &e, double &rmse)
+    {
+      double pred = 0.0;
+      for(size_t i = 0;i < NLATENT;i ++) {
+        pred += f_user.pvec[i] * f_item.pvec[i];
+      }
+      pred = std::min(pred, MAXVAL);
+      pred = std::max(pred, MINVAL);
+      float err = e.obs - pred;
+      rmse += err * err;
+    }
+
+
 };
 
 double NMF::MAXVAL = 1e+100;
@@ -173,8 +187,13 @@ int main(int argc, char ** argv)
     // 3. apply update
     binary_app<NMF::Ftype, NMF::Ftype>(*f_item, *r_item, NMF::apply_delta);
 
+    /* accumulate rmse */
+    double rmse = 0.0;
+    graph->edge_apply<NMF::Ftype, NMF::Ftype, double>
+        (*f_user, *f_item, rmse, NMF::acc_error);
+    rmse = std::sqrt(rmse / double(num_edges) );
 
-    LOG(INFO) << " NMF::iterator " << iter << " end .";
+    LOG(INFO) << " NMF::iterator " << iter << " rmse : " << rmse << " end .";
 
   }
 

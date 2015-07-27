@@ -153,7 +153,7 @@ class Graph {
       acc_op(vec1[e.src], vec2[e.dst], e.val, acc);
     }
   }
-                  
+
 
 
   /* do edge apply , apply to U and apply to V*/
