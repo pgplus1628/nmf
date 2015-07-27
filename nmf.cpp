@@ -20,7 +20,7 @@ static RandGen RG;
 class NMF {
     public :
 
-    static const size_t NLATENT = 20;
+    static const size_t NLATENT = 128;
     static constexpr double epsilon = 1e-16;
     static double MAXVAL;
     static double MINVAL;
@@ -45,6 +45,11 @@ class NMF {
 
     struct Ftype {
       double pvec[NLATENT];
+      std::string to_string() { 
+        std::string ret;
+        std::for_each(pvec, pvec + NLATENT, [&](double &x) {ret += " " + std::to_string(x) ;});
+        return ret;
+      }
     };
     typedef struct Ftype Ftype;
 
@@ -89,12 +94,16 @@ class NMF {
     {
       double pred = 0.0;
       for(size_t i = 0;i < NLATENT;i ++) {
-        pred += f1.pvec[i] * f2.pvec[i];
+        pred += 
+        f1.pvec[i] * 
+        f2.pvec[i];
       }
       pred = std::min(pred, MAXVAL);
       pred = std::max(pred, MINVAL);
       for(size_t i = 0;i < NLATENT;i ++) {
-        r1.pvec[i] *= e.obs / pred;
+        r1.pvec[i] +=  
+        f2.pvec[i] 
+        * e.obs / pred;
       }
     }
 
@@ -154,6 +163,8 @@ int main(int argc, char ** argv)
   unary_app<NMF::Ftype>(*f_user, NMF::rand_f);
   unary_app<NMF::Ftype>(*f_item, NMF::rand_f);
 
+  LOG(INFO) << " Begin Main Loop .";
+
   for(size_t iter = 0; iter < FLAGS_max_iter; iter ++) {
     unary_app<NMF::Ftype>(*r_user, NMF::reset_f);
     unary_app<NMF::Ftype>(*r_item, NMF::reset_f);
@@ -162,30 +173,37 @@ int main(int argc, char ** argv)
     // 1. acc item f
     NMF::reset_f(NMF::px);
     mapreduce_vec<NMF::Ftype, NMF::Ftype>(*f_item, NMF::px, NMF::acc_f);
+    //LOG(INFO) << " px : " << NMF::px.to_string();
     // 2. edge apply, gen update 
     graph->edge_apply<NMF::Ftype, NMF::Ftype, NMF::Ftype>
         (*f_user,
          *f_item,
          *r_user,
-         NMF::acc_delta);
+         NMF::acc_delta,
+         false);
     // 3. apply update
     binary_app<NMF::Ftype, NMF::Ftype>(*f_user, *r_user, NMF::apply_delta);
-    
- 
+
+
+    //dump_vec<NMF::Ftype>(*r_user, "r_user_" + std::to_string(iter) + ".dat");
+    //dump_vec<NMF::Ftype>(*f_user, "f_user_" + std::to_string(iter) + ".dat");
 
 
     /* update item side */
     // 1. acc user f
     NMF::reset_f(NMF::px);
     mapreduce_vec<NMF::Ftype, NMF::Ftype>(*f_user, NMF::px, NMF::acc_f);
+    //LOG(INFO) << " px : " << NMF::px.to_string();
     // 2. edge apply, gen update
     graph->edge_apply<NMF::Ftype, NMF::Ftype, NMF::Ftype>
         (*f_item,
          *f_user,
          *r_item,
-         NMF::acc_delta);
+         NMF::acc_delta,
+         true);
     // 3. apply update
     binary_app<NMF::Ftype, NMF::Ftype>(*f_item, *r_item, NMF::apply_delta);
+    //dump_vec<NMF::Ftype>(*f_user, "f_item_" + std::to_string(iter) + ".dat");
 
     /* accumulate rmse */
     double rmse = 0.0;

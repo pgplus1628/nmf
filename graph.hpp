@@ -199,12 +199,21 @@ class Graph {
   template<typename UT, typename VT, typename RUT>
   void edge_apply(std::vector<UT> &vecU, std::vector<VT> &vecV, 
                   std::vector<RUT> &vecRU,
-                  std::function<void(UT&, VT&, ET&, RUT&)> app_op)
+                  std::function<void(UT&, VT&, ET&, RUT&)> app_op,
+                  bool reverseU)
   {
-    for(auto &e : edges ) {
-      VidType s = e.src;
-      VidType d = e.dst;
-      app_op(vecU[s], vecV[d], e.val, vecRU[s]);
+    if (reverseU) {
+      for(auto &e : edges ) {
+        VidType d = e.src;
+        VidType s = e.dst;
+        app_op(vecU[s], vecV[d], e.val, vecRU[s]);
+      }
+    } else { 
+      for(auto &e : edges ) {
+        VidType s = e.src;
+        VidType d = e.dst;
+        app_op(vecU[s], vecV[d], e.val, vecRU[s]);
+      }
     }
   }
 
