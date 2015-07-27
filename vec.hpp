@@ -28,6 +28,15 @@ void binary_app(std::vector<VT1> &vec1, std::vector<VT2> &vec2, std::function<vo
   }
 }
 
+template<typename VT1, typename VT2, typename ST>
+void binary_app(std::vector<VT1> &vec1, std::vector<VT2> &vec2, ST& scal, 
+                std::function<void(VT1&, VT2&, ST&)> op)
+{
+  for(size_t i = 0;i < vec1.size();i ++) {
+    op(vec1[i], vec2[i], scal);
+  }
+}
+
 template<typename VT1, 
          typename VT2,
          typename VT3,

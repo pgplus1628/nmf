@@ -52,41 +52,25 @@ int main(int argc, char ** argv)
     unary_app<NMF::Ftype>(*r_user, NMF::reset_f);
     unary_app<NMF::Ftype>(*r_item, NMF::reset_f);
 
-    /* update user side */
-    // 1. acc item f
+    /* update user side and item side */
+    // 1. acc f
     NMF::reset_f(NMF::px);
     mapreduce_vec<NMF::Ftype, NMF::Ftype>(*f_item, NMF::px, NMF::acc_f);
+    NMF::reset_f(NMF::px2);
+    mapreduce_vec<NMF::Ftype, NMF::Ftype>(*f_user, NMF::px2, NMF::acc_f);
+
     //LOG(INFO) << " px : " << NMF::px.to_string();
     // 2. edge apply, gen update 
-    graph->edge_apply<NMF::Ftype, NMF::Ftype, NMF::Ftype>
-        (*f_user,
-         *f_item,
-         *r_user,
-         NMF::acc_delta,
-         false);
+    graph->edge_apply<NMF::Ftype, NMF::Ftype, NMF::Ftype, NMF::Ftype>
+      (*f_user,
+       *f_item,
+       *r_user,
+       *r_item,
+       NMF::acc_delta2);
     // 3. apply update
-    binary_app<NMF::Ftype, NMF::Ftype>(*f_user, *r_user, NMF::apply_delta);
 
-
-    //dump_vec<NMF::Ftype>(*r_user, "r_user_" + std::to_string(iter) + ".dat");
-    //dump_vec<NMF::Ftype>(*f_user, "f_user_" + std::to_string(iter) + ".dat");
-
-
-    /* update item side */
-    // 1. acc user f
-    NMF::reset_f(NMF::px);
-    mapreduce_vec<NMF::Ftype, NMF::Ftype>(*f_user, NMF::px, NMF::acc_f);
-    //LOG(INFO) << " px : " << NMF::px.to_string();
-    // 2. edge apply, gen update
-    graph->edge_apply<NMF::Ftype, NMF::Ftype, NMF::Ftype>
-        (*f_item,
-         *f_user,
-         *r_item,
-         NMF::acc_delta,
-         true);
-    // 3. apply update
-    binary_app<NMF::Ftype, NMF::Ftype>(*f_item, *r_item, NMF::apply_delta);
-    //dump_vec<NMF::Ftype>(*f_user, "f_item_" + std::to_string(iter) + ".dat");
+    binary_app<NMF::Ftype, NMF::Ftype, NMF::Ftype>(*f_user, *r_user, NMF::px, NMF::apply_delta);
+    binary_app<NMF::Ftype, NMF::Ftype, NMF::Ftype>(*f_item, *r_item, NMF::px2, NMF::apply_delta);
 
     /* accumulate rmse */
     double rmse = 0.0;

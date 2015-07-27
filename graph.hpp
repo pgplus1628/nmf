@@ -218,6 +218,17 @@ class Graph {
   }
 
 
+  template<typename UT, typename VT, typename RUT, typename RVT>
+  void edge_apply(std::vector<UT> &vecU, std::vector<VT> &vecV,
+                  std::vector<RUT> &vecRU, std::vector<RVT> &vecRV,
+                  std::function<void(UT&, VT&, ET&, RUT&, RVT&)> app_op)
+  {
+    for(auto &e : edges ) {
+      VidType s = e.src;
+      VidType d = e.dst;
+      app_op(vecU[s], vecV[d], e.val, vecRU[s], vecRV[d]);
+    }
+  }
 
 
    /* <U, V> */
